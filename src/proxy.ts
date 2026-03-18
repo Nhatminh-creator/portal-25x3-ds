@@ -1,21 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Tên hàm PHẢI là proxy để khớp với tên file proxy.ts
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Protected routes
-  const protectedRoutes = ['/diem-danh', '/lich-su']
-  
-  // Check if the current route is protected
-  if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    // Middleware-level auth check would require session management
-    // For now, the ProtectedRoute component handles the client-side protection
-  }
-
+  // Giữ nguyên logic bảo mật của bạn ở đây
   return NextResponse.next()
 }
 
-export const config = {
-  matcher: ['/diem-danh/:path*', '/lich-su/:path*', '/'],
-}
+// Hoặc dùng export default cho chắc ăn
+export default proxy
