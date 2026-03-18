@@ -2,8 +2,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
+interface User {
+  id: string
+  email?: string
+}
+
 type AuthContextType = {
-  user: any
+  user: User | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -13,7 +18,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
+export function proxy() {
   // Logic bảo mật của Minh giữ nguyên ở đây
   return NextResponse.next()
 }

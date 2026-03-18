@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/app/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 interface Student {
-  id: number;
-  ma_sinh_vien: string;
-  ho_ten: string;
+  mssv: string;
+  full_name: string;
+  email: string;
+  role: string;
+  user_id: string;
 }
 
 type AttendanceStatus = 'Có mặt' | 'Muộn' | 'Vắng';
@@ -21,9 +23,9 @@ function DiemDanhContent() {
   const fetchStudents = async () => {
     try {
       const { data, error } = await supabase
-        .from('sinh_vien')
+        .from('profiles')
         .select('*')
-        .order('ma_sinh_vien', { ascending: true });
+        .order('mssv', { ascending: true });
 
       if (error) {
         console.error('Lỗi chi tiết từ Supabase:', error.message, error.details);
@@ -35,7 +37,7 @@ function DiemDanhContent() {
 
         const initialAttendance: Record<string, AttendanceStatus> = {};
         (data as Student[]).forEach((student) => {
-          initialAttendance[student.ma_sinh_vien] = 'Có mặt';
+          initialAttendance[student.mssv] = 'Có mặt';
         });
         setAttendance(initialAttendance);
       }
@@ -50,36 +52,17 @@ function DiemDanhContent() {
     fetchStudents();
   }, []);
 
-  const updateStatus = (ma_sinh_vien: string, status: AttendanceStatus) => {
+  const updateStatus = (mssv: string, status: AttendanceStatus) => {
     setAttendance((prev) => ({
       ...prev,
-      [ma_sinh_vien]: status,
+      [mssv]: status,
     }));
   };
 
   const handleSaveAttendance = async () => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const ngay_diem_danh = `${yyyy}-${mm}-${dd}`;
-
-    const mang_du_lieu = Object.entries(attendance).map(([ma_sinh_vien, trang_thai]) => ({
-      ma_sinh_vien,
-      ngay_diem_danh,
-      trang_thai,
-    }));
-
-    try {
-      const { error } = await supabase.from('diem_danh').insert(mang_du_lieu);
-      if (error) {
-        alert(`Lỗi khi lưu điểm danh: ${error.message}`);
-        return;
-      }
-      alert('Lưu điểm danh thành công!');
-    } catch (err) {
-      alert(`Lỗi khi lưu điểm danh: ${err}`);
-    }
+    // TODO: attendance_records system will be implemented with new database schema
+    // Implement new attendance tracking system with the updated system
+    alert('Chức năng điểm danh đang được cập nhật. Vui lòng quay lại sau!');
   };
 
   if (loading) {
@@ -118,15 +101,15 @@ function DiemDanhContent() {
                 </tr>
               ) : (
                 students.map((student) => (
-                  <tr key={student.ma_sinh_vien} className="border-b border-border/30 hover:bg-secondary/30 transition-colors">
-                    <td className="px-4 md:px-6 py-3 text-sm md:text-base text-foreground font-medium">{student.ma_sinh_vien}</td>
-                    <td className="px-4 md:px-6 py-3 text-sm md:text-base text-foreground">{student.ho_ten}</td>
+                  <tr key={student.mssv} className="border-b border-border/30 hover:bg-secondary/30 transition-colors">
+                    <td className="px-4 md:px-6 py-3 text-sm md:text-base text-foreground font-medium">{student.mssv}</td>
+                    <td className="px-4 md:px-6 py-3 text-sm md:text-base text-foreground">{student.full_name}</td>
                     <td className="px-4 md:px-6 py-3">
                       <div className="flex justify-center flex-wrap gap-1 md:gap-2">
                         <button
-                          onClick={() => updateStatus(student.ma_sinh_vien, 'Có mặt')}
+                          onClick={() => updateStatus(student.mssv, 'Có mặt')}
                           className={`px-2 md:px-3 py-1 text-xs md:text-sm font-medium rounded transition-colors ${
-                            attendance[student.ma_sinh_vien] === 'Có mặt'
+                            attendance[student.mssv] === 'Có mặt'
                               ? 'bg-green-600 text-white'
                               : 'bg-slate-700 hover:bg-green-600/50 text-slate-300'
                           }`}
@@ -134,9 +117,9 @@ function DiemDanhContent() {
                           Có
                         </button>
                         <button
-                          onClick={() => updateStatus(student.ma_sinh_vien, 'Muộn')}
+                          onClick={() => updateStatus(student.mssv, 'Muộn')}
                           className={`px-2 md:px-3 py-1 text-xs md:text-sm font-medium rounded transition-colors ${
-                            attendance[student.ma_sinh_vien] === 'Muộn'
+                            attendance[student.mssv] === 'Muộn'
                               ? 'bg-yellow-600 text-white'
                               : 'bg-slate-700 hover:bg-yellow-600/50 text-slate-300'
                           }`}
@@ -144,9 +127,9 @@ function DiemDanhContent() {
                           Muộn
                         </button>
                         <button
-                          onClick={() => updateStatus(student.ma_sinh_vien, 'Vắng')}
+                          onClick={() => updateStatus(student.mssv, 'Vắng')}
                           className={`px-2 md:px-3 py-1 text-xs md:text-sm font-medium rounded transition-colors ${
-                            attendance[student.ma_sinh_vien] === 'Vắng'
+                            attendance[student.mssv] === 'Vắng'
                               ? 'bg-red-600 text-white'
                               : 'bg-slate-700 hover:bg-red-600/50 text-slate-300'
                           }`}
