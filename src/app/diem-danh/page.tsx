@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
@@ -16,6 +17,7 @@ interface Student {
 type AttendanceStatus = 'Có mặt' | 'Muộn' | 'Vắng';
 
 function DiemDanhContent() {
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
   const [loading, setLoading] = useState(true);
@@ -60,9 +62,29 @@ function DiemDanhContent() {
   };
 
   const handleSaveAttendance = async () => {
-    // TODO: attendance_records system will be implemented with new database schema
-    // Implement new attendance tracking system with the updated system
-    alert('Chức năng điểm danh đang được cập nhật. Vui lòng quay lại sau!');
+    try {
+      const attendanceData = students.map((student) => ({
+        mssv: student.mssv,
+        full_name: student.full_name,
+        status: attendance[student.mssv],
+      }));
+
+      const { error } = await supabase
+        .from('attendance_logs')
+        .insert(attendanceData);
+
+      if (error) {
+        console.error('Lỗi lưu dữ liệu:', error.message);
+        alert('Lỗi: ' + error.message);
+        return;
+      }
+
+      alert('Đã điểm danh thành công cho 44 anh em!');
+      router.push('/');
+    } catch (error) {
+      console.error('Lỗi không mong muốn:', error);
+      alert('Có lỗi xảy ra, vui lòng thử lại');
+    }
   };
 
   if (loading) {
